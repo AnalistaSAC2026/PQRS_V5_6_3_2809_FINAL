@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Dashboard ejecutivo de seguimiento PQRS por área">
+  <title>Seguimiento PQRS · Dashboard Ejecutivo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <div id="sidebarOverlay" class="sidebar-overlay" hidden></div>
+    <aside class="sidebar" id="sidebar" aria-label="Navegación del dashboard" aria-hidden="false">
+      <div class="brand">
+        <img src="assets/logo-emi-falck.png" alt="emi Falck">
+        <div class="brand-copy">
+          <strong>PQRS</strong>
+          <span>Seguimiento 2026</span>
+        </div>
+        <button id="sidebarCloseBtn" class="sidebar-close-btn" type="button" aria-label="Cerrar menú">×</button>
+      </div>
+
+      <nav class="nav" aria-label="Navegación principal">
+        <button class="nav-item active" data-view="summary" data-tooltip="Resumen General" aria-current="page"><span class="nav-icon" aria-hidden="true">◫</span><span class="nav-label">Resumen General</span></button>
+        <button class="nav-item" data-view="medical" data-tooltip="Área Médica"><span class="nav-icon" aria-hidden="true">✚</span><span class="nav-label">Área Médica</span></button>
+        <button class="nav-item" data-view="commercial" data-tooltip="Área Comercial"><span class="nav-icon" aria-hidden="true">◆</span><span class="nav-label">Área Comercial</span></button>
+        <button class="nav-item" data-view="sac" data-tooltip="Área SAC"><span class="nav-icon" aria-hidden="true">☎</span><span class="nav-label">Área SAC</span></button>
+        <button class="nav-item" data-view="portfolio" data-tooltip="Área Cartera"><span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">Área Cartera</span></button>
+        <button class="nav-item" data-view="tracking" data-tooltip="Seguimiento"><span class="nav-icon" aria-hidden="true">▦</span><span class="nav-label">Seguimiento</span></button>
+        <button class="nav-item" data-view="motives" data-tooltip="Motivos"><span class="nav-icon" aria-hidden="true">≡</span><span class="nav-label">Motivos</span></button>
+      </nav>
+      <button id="sidebarToggleBtn" class="sidebar-toggle-btn" type="button" aria-expanded="true" aria-controls="sidebar">
+        <span aria-hidden="true">‹</span><span class="nav-label">Contraer menú</span>
+      </button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <button id="menuBtn" class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar">☰</button>
+          <p id="pageEyebrow" class="eyebrow" hidden>Seguimiento PQRS</p>
+          <h1 id="pageTitle">Resumen General</h1>
+          <p id="pageDescription" class="page-description">Visión ejecutiva general de la operación.</p>
+        </div>
+        <div class="top-actions">
+          <button id="exportBtn" class="btn ghost">Exportar CSV</button>
+        </div>
+      </header>
+
+      <section class="filter-strip" aria-label="Filtros globales">
+        <div class="filter-header">
+          <div class="filter-title-group">
+            <span class="filter-kicker">Filtros</span>
+            <span id="filterActiveCount" class="filter-active-count" aria-live="polite" hidden></span>
+            <button id="mobileFilterToggle" class="mobile-filter-toggle" type="button" aria-expanded="false" aria-controls="filterMobileDrawer">
+              Filtros · <span id="mobileActiveFilters">0 activos</span>
+            </button>
+          </div>
+          <div class="filter-actions" aria-label="Acciones rápidas de filtros">
+            <button id="presetBtn" class="text-btn" type="button">Periodo libro</button>
+            <button id="allYearBtn" class="text-btn" type="button">Todo el año</button>
+            <button id="resetBtn" class="text-btn danger" type="button">Restablecer</button>
+          </div>
+        </div>
+        <div id="filterPanel" class="filter-panel">
+          <div id="filters" class="filters"></div>
+        </div>
+        <div class="filter-toolbar-footer">
+          <div id="filterActiveChips" class="filter-active-chips" aria-label="Filtros activos" aria-live="polite"></div>
+        </div>
+        <div id="filterContext" class="filter-context" aria-live="polite">Periodo del libro</div>
+      </section>
+
+      <div id="loading" class="loading hidden" role="status" aria-live="polite">
+        <div class="spinner"></div>
+        <strong>Procesando libro...</strong>
+        <span>La información permanece en este navegador.</span>
+      </div>
+
+      <section id="view" class="view" aria-live="polite"></section>
+    </main>
+  </div>
+
+
+  <div id="filterMobileOverlay" class="filter-mobile-overlay" hidden></div>
+  <aside id="filterMobileDrawer" class="filter-mobile-drawer" role="dialog" aria-modal="true" aria-labelledby="filterMobileTitle" aria-hidden="true" inert>
+    <header class="filter-mobile-head">
+      <div><span>Filtros</span><h2 id="filterMobileTitle">Filtrar resultados</h2></div>
+      <button id="filterMobileClose" class="filter-mobile-close" type="button" aria-label="Cerrar filtros">Ã—</button>
+    </header>
+    <div id="filterMobileContent" class="filter-mobile-content"></div>
+    <footer class="filter-mobile-footer">
+      <button id="filterMobileReset" class="filter-mobile-reset" type="button">Limpiar</button>
+      <button id="filterMobileDone" class="filter-mobile-done" type="button">Cerrar</button>
+    </footer>
+  </aside>
+
+  <div id="trackingDrawerOverlay" class="tracking-drawer-overlay" hidden></div>
+  <aside id="trackingDrawer" class="tracking-drawer" role="dialog" aria-modal="true" aria-labelledby="trackingDrawerTitle" aria-hidden="true">
+    <div class="tracking-drawer-head">
+      <div>
+        <p class="tracking-drawer-kicker">Detalle de PQRS</p>
+        <h2 id="trackingDrawerTitle">Seguimiento</h2>
+        <p id="trackingDrawerSubtitle" class="tracking-drawer-subtitle"></p>
+      </div>
+      <button id="trackingDrawerClose" class="tracking-drawer-close" type="button" aria-label="Cerrar detalle">×</button>
+    </div>
+    <div id="trackingDrawerContext" class="tracking-drawer-context"></div>
+    <div class="tracking-drawer-tools">
+      <label class="tracking-search">
+        <span>Buscar radicado</span>
+        <input id="trackingDetailSearch" type="search" inputmode="search" autocomplete="off" placeholder="Ej. 2026-023591" />
+      </label>
+      <label class="tracking-sort">
+        <span>Ordenar</span>
+        <select id="trackingDetailSort">
+          <option value="days-desc">Días · mayor a menor</option>
+          <option value="days-asc">Días · menor a mayor</option>
+          <option value="radicado-asc">Radicado</option>
+          <option value="classification-asc">Tipo PQRS</option>
+          <option value="area-asc">Área</option>
+        </select>
+      </label>
+      <button id="trackingDetailExport" class="btn ghost tracking-export-btn" type="button">Exportar CSV</button>
+    </div>
+    <div class="tracking-detail-status">
+      <strong id="trackingDetailCount">0 registros</strong>
+      <span id="trackingDetailCutoff"></span>
+    </div>
+    <div id="trackingDetailEmpty" class="tracking-detail-empty" hidden>No se encontraron registros para este criterio.</div>
+    <div id="trackingDetailTableWrap" class="tracking-detail-table-wrap">
+      <table class="tracking-detail-table">
+        <thead><tr><th>Radicado</th><th>Tipo PQRS</th><th>Área</th><th>Días</th><th>Estado</th><th>Motivo</th></tr></thead>
+        <tbody id="trackingDetailBody"></tbody>
+      </table>
+    </div>
+  </aside>
+
+  <div id="kpiDetailBackdrop" class="kpi-detail-backdrop" hidden></div>
+  <section id="kpiDetailModal" class="kpi-detail-modal" role="dialog" aria-modal="true" aria-labelledby="kpiDetailTitle" aria-hidden="true" hidden>
+    <header class="kpi-detail-header">
+      <div>
+        <p class="kpi-detail-kicker">Detalle de indicador</p>
+        <h2 id="kpiDetailTitle">Detalle KPI</h2>
+        <p id="kpiDetailSummary" class="kpi-detail-summary"></p>
+      </div>
+      <button id="kpiDetailClose" class="kpi-detail-close" type="button" aria-label="Cerrar detalle">×</button>
+    </header>
+    <div id="kpiDetailContext" class="kpi-detail-context"></div>
+    <div class="kpi-detail-toolbar">
+      <label class="kpi-detail-search"><span>Buscar radicado o motivo</span><input id="kpiDetailSearch" type="search" autocomplete="off" placeholder="Buscar radicado o motivo…"></label>
+      <label class="kpi-detail-sort"><span>Ordenar</span><select id="kpiDetailSort"><option value="radicado-asc">Radicado</option><option value="state-asc">Estado</option><option value="motive-asc">Motivo</option><option value="area-asc">Área</option></select></label>
+      <label class="kpi-detail-size"><span>Filas</span><select id="kpiDetailPageSize"><option value="25">25</option><option value="50" selected>50</option><option value="100">100</option></select></label>
+      <button id="kpiDetailExport" class="btn ghost" type="button">Exportar CSV</button>
+    </div>
+    <div class="kpi-detail-status"><strong id="kpiDetailCount">0 registros</strong><span id="kpiDetailPageStatus">Página 1 de 1</span></div>
+    <div id="kpiDetailEmpty" class="kpi-detail-empty" hidden>No hay radicados para este indicador con los filtros seleccionados.</div>
+    <div id="kpiDetailTableWrap" class="kpi-detail-table-wrap">
+      <table class="kpi-detail-table">
+        <thead id="kpiDetailHead"><tr><th>Radicado</th><th>Periodo</th><th>Clasificación</th><th>Área</th><th>Estado</th><th>Motivo</th><th>País</th><th>Ciudad</th><th>Situación</th><th>Responsable</th></tr></thead>
+        <tbody id="kpiDetailBody"></tbody>
+      </table>
+    </div>
+    <footer class="kpi-detail-pagination"><button id="kpiDetailPrev" type="button">Anterior</button><button id="kpiDetailNext" type="button">Siguiente</button></footer>
+  </section>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="data.js"></script>
+  <script src="commercial-verbatim.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
